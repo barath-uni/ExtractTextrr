@@ -32,10 +32,11 @@ def get_date_description_info(line):
 
 def get_file_name(file_path):
     split_val = "C:\\Users\\barad\\CodeSpace\\websites\\androidmonks.com\\"
-    val = file_path.split(split_val)[1]
-    print(val)
-    val = val.replace("\\","-")
-    print(val)
+    print("BEFORE")
+    print(file_path)
+    val = os.path.split(file_path)[1]
+    val = val.replace(".html","")
+    val = val.replace(" ","_")
     return val
 
 
@@ -46,34 +47,24 @@ def convert_to_md(output_dir, file_path_list):
         # get file_name
         with open(file_path, 'r', encoding="utf-8") as f:
             html = f.read()
-
+   
         # Create markdown
         text = markdownify.markdownify(html, heading_style="ATX")
-        with open(f"{output_dir}/{file_name}.md", 'w', encoding="utf-8") as write_file:
+        with open(f"{output_dir}/{file_name}.md", 'w+', encoding="utf-8") as write_file:
             write_file.write(text)
 
         # Clean up the text before sending to md
         temp_file = "temp.txt"
 
         markdown_data = MarkdowndataModel()
+        doc_title = "TITLE HERE"
+        description, date_published, date_modified = "DESCRIPTION", "2022-08-08", "2022-08-08"
         # Markdown model
         lines = list()
         with open(f"{output_dir}/{file_name}.md", "r", encoding="utf-8") as input_file:
             with open(temp_file, "w", encoding="utf-8") as output:
-                file_start = False
-                for line in input_file:
-                    if "datePublished" in line.strip("\n"):
-                        print("Date published")
-                        date_published, date_modified, description = get_date_description_info(line)
-                    if line.strip("\n").startswith('# '):
-                        file_start = True
-                        doc_title = line
-                    if line.strip("\n").startswith('### Leave a Comment'):
-                        file_start = False
-                    if file_start:
-                        lines.append(line)
                 markdown_data.set_model_info(doc_title, description, date_published, date_modified, "")
-                output_lines = ''.join(lines)
+                output_lines = ''.join(input_file)
                 output_lines = markdown_data.get_model_info_as_text() + output_lines
                 output.write(output_lines)
                 # Add important markdown information
@@ -81,11 +72,13 @@ def convert_to_md(output_dir, file_path_list):
 
 
 if __name__ == '__main__':
-    directory = "C:/Users/barad/CodeSpace/websites/"
+    directory = "/home/barath/blogwriter/AutoBlogWriter/output"
     # Get all the file paths that have to converted to a md file here
     file_paths = get_all_file_path(directory)
     print(file_paths)
-    convert_to_md("C:/Users/barad/CodeSpace/websites/outputdir", file_paths)
+    if not os.path.exists("/home/barath/blogwriter/AutoBlogWriter/outputdir"):
+        os.makedirs("/home/barath/blogwriter/AutoBlogWriter/outputdir")
+    convert_to_md("/home/barath/blogwriter/AutoBlogWriter/outputdir", file_paths)
 # Create a Next.JS POST file
 
 # Save and Exit
